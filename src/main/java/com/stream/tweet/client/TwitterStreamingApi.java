@@ -20,16 +20,24 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class TwitterStreamingApi {
 
-	BlockingQueue<String> msgQueue = new LinkedBlockingQueue<String>(100);
+	private static TwitterStreamingApi TWITTER_STREAMING_API = null;
 
+	private TwitterStreamingApi() {
+	}
 
+	public static TwitterStreamingApi getInstance() {
+		if (TWITTER_STREAMING_API == null) {
+			TWITTER_STREAMING_API = new TwitterStreamingApi();
+		}
+		return TWITTER_STREAMING_API;
+	}
 
-	public BasicClient getTwitterClient() {
+	public BasicClient getTwitterClient(BlockingQueue<String> msgQueue) {
 
 		Hosts hosebirdHosts = new HttpHosts(Constants.STREAM_HOST);
 		StatusesFilterEndpoint hosebirdEndpoint = new StatusesFilterEndpoint();
 		// Optional: set up some followings and track terms
-		List<String> terms = Lists.newArrayList("twitter", "api");
+		List<String> terms = Lists.newArrayList("trump");
 		hosebirdEndpoint.trackTerms(terms);
 
 		TwitterProperties properties = TwitterProperties.getInstance();
@@ -42,9 +50,7 @@ public class TwitterStreamingApi {
 					twitterProperty.get().getApiSecret(),
 					twitterProperty.get().getAccessToken(),
 					twitterProperty.get().getAccessTokenSecret());
-
-		}
-		else{
+		} else {
 			throw new IllegalArgumentException("Unable to retrieve data from twitter property");
 		}
 
@@ -54,7 +60,6 @@ public class TwitterStreamingApi {
 				.authentication(hosebirdAuth)
 				.endpoint(hosebirdEndpoint)
 				.processor(new StringDelimitedProcessor(msgQueue));
-
 
 		return horsebirdBuilder.build();
 	}
