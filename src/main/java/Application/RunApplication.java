@@ -26,7 +26,15 @@ public class RunApplication {
 
 		Client twitterClient = twitterStreamingApi.getTwitterClient(msgQueue);
 		twitterClient.connect();
+		// add shutdown hoook
+		Runtime.getRuntime().addShutdownHook(new Thread( () -> {
+			System.out.println("stopping Application...");
+			kafkaProducer.flush();
+//			kafkaProducer.close();
+			twitterClient.stop();
+		}));
 
+		// check kafka version same as client version
 		while (!twitterClient.isDone()) {
 			String msg = "";
 			try {
@@ -37,11 +45,13 @@ public class RunApplication {
 			}
 			System.out.println(msg);
 			if(msg != null){
-				try {
-					kafkaProducer.send(new ProducerRecord<>("twitter_trump", null, msg)).get();
-				} catch (InterruptedException | ExecutionException e) {
-					e.printStackTrace();
-				}
+				kafkaProducer.send(new ProducerRecord<>("twitter_trump", null, msg), (messageMetaData, e) ->{
+					if(e!=null){
+						System.err.println("Something wrong with kafka producer");
+						e.printStackTrace();
+						kafkaProducer.close();
+					}
+				});
 
 			}
 		}
