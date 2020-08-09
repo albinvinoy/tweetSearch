@@ -37,7 +37,7 @@ public class TwitterStreamingApi {
 		Hosts hosebirdHosts = new HttpHosts(Constants.STREAM_HOST);
 		StatusesFilterEndpoint hosebirdEndpoint = new StatusesFilterEndpoint();
 		// Optional: set up some followings and track terms
-		List<String> terms = Lists.newArrayList("trump");
+		List<String> terms = Lists.newArrayList("nba");
 		hosebirdEndpoint.trackTerms(terms);
 
 		TwitterProperties properties = TwitterProperties.getInstance();
