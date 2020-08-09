@@ -11,8 +11,20 @@ import java.util.Optional;
 public class TwitterProperties {
 
 	private static final String twitterPropertyFileName =  "twitter.properties";
+	private static TwitterProperties TWITTER_PROPERTIES = null;
 
-	private static File loadTwitterProperties(){
+	private TwitterProperties() {}
+
+	public static TwitterProperties getInstance(){
+		if(TWITTER_PROPERTIES == null){
+			synchronized (TwitterProperties.class){
+				TWITTER_PROPERTIES = new TwitterProperties();
+			}
+		}
+		return TWITTER_PROPERTIES;
+	}
+
+	private File loadTwitterProperties(){
 		ClassLoader classLoader = new ClassLoader() {
 			@Override
 			public String getName() {
@@ -30,7 +42,7 @@ public class TwitterProperties {
 
 	}
 
-	private static Optional<Object> getTwitterProperties() {
+	public Optional<TwitterPropertyModel> getTwitterProperties() {
 		Map<String, String> properties = new HashMap<>();
 
 		try(
@@ -52,7 +64,7 @@ public class TwitterProperties {
 				.bearerToken(properties.get("bearerToken"))
 				.build();
 
-		return Optional.ofNullable(model);
+		return Optional.of(model);
 
 	}
 
